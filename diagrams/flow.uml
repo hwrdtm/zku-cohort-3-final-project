@@ -1,0 +1,51 @@
+@startuml
+
+title Anonymous Coordinape Flows
+
+participant "Epoch Admin" as ea
+participant "Epoch Member" as em
+box "Smart Contracts" #LightBlue
+    participant "EpochManager" as emger
+    participant "CheckTokenAllocationsVerifier" as v
+end box
+participant "Backend Process" as proc
+
+== Admin sets up Epoch ==
+
+ea -> emger: EpochManager.scheduleNewEpoch(epochDuration)
+    emger -> emger: emit EpochUpdated(epochId)
+ea -> emger: EpochManager.updateEpochMembers(memberWalletAddresses)
+    emger -> emger: emit EpochUpdated(epochId)
+
+... after some time Epoch becomes active ...
+
+== Members commit token allocations  during live Epoch ==
+
+em -> proc: POST /commitTokenAllocations\n{ tokenAllocations, epochId }
+
+em -> emger: EpochManager.updateTokenAllocationCommitment(hash)
+
+proc -> emger: EpochManager.submitTokenAllocationCommitmentProof(hash, zkProof)
+    emger -> v: CheckTokenAllocationsVerifier.verifyProof(zkProof)
+    v --> emger: true
+
+note over em
+Epoch members can update their commitment
+as many times as they wish.
+end note
+
+em --> emger: EpochManager.updateTokenAllocationCommitment(hash, zkProof)
+em --> emger:
+em --> emger:
+
+== tally token allocations when Epoch ends ==
+
+alt V1
+    proc -> proc: tallyTokenAllocations() -> finalTokenAllocations
+    proc -> emger: EpochManager.submitRevealedTokenAllocations(finalTokenAllocations)
+else V2 (tamper-proof)
+    proc -> proc: generateZKProofForTallyTokenAllocations()\n -> zkProof, finalTokenAllocations (as public output signal)
+    proc -> emger: EpochManager.submitRevealedTokenAllocations(finalTokenAllocations, zkProof)
+end
+
+@enduml
