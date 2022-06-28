@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import EpochManager from "../../contracts/EpochManager.json";
-import { providers, Contract, utils } from "ethers";
-import { Container, List } from "@mui/material";
+import { providers, Contract } from "ethers";
+import { Container } from "@mui/material";
 import { Epoch } from "models";
 import { fetchEpoch } from "services/epochManager";
 import EpochDetails from "components/EpochDetails";

@@ -1,12 +1,8 @@
-import { BigNumber, Contract, ethers, providers, Signer, utils } from "ethers";
+import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import EpochManager from "../../contracts/EpochManager.json";
 import {
-  CollectRewardParams,
   Epoch,
   NewEpochParams,
-  SolidityProof,
-  SolidityProofInput,
-  SubmitTokenAllocationCommitmentProofParams,
   UpdateTokenAllocationCommitmentParams,
 } from "../../models";
 import {
@@ -225,7 +221,7 @@ export async function updateTokenAllocations(
   }
 
   // 6. POST to API for verification with proof - (salt, tokenAllocations, addressOfEpochAdmin, signature)
-  const response = await fetch("/api/token-allocations", {
+  await fetch("/api/token-allocations", {
     method: "POST",
     body: JSON.stringify({
       privSalt: privSalt.toString(),
