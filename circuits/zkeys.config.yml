@@ -11,8 +11,8 @@ circomFlags: "--r1cs --sym --wasm --wat"
 circuits:
   - template: "./CheckTokenAllocations.circom"
     component: "CheckTokenAllocations"
-    params: [10]
-    pubInputs: ["pubTokenAllocationHash"]
+    params: [15]
+    pubInputs: ["pubTokenAllocationHash", "allocatingMemberIdx", "numMembers"]
     type: "test"
 
 ptauFiles:

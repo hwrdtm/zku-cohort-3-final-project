@@ -8,3 +8,5 @@ circuits/zkeys/*
 cache
 artifacts
 circuits/build
+
+.env

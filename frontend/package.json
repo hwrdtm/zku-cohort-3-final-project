@@ -1,0 +1,43 @@
+{
+  "name": "anonymous-coordinape-frontend",
+  "version": "1.0.0",
+  "description": "Anonymous Coordinape Frontend.",
+  "license": "GPLv3",
+  "scripts": {
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@metamask/detect-provider": "^1.2.0",
+    "@mui/material": "^5.8.1",
+    "assert": "^2.0.0",
+    "circomlibjs": "^0.1.6",
+    "next": "12.0.10",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-hook-form": "^7.31.3",
+    "redis": "^4.1.0",
+    "snarkjs": "^0.4.22",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "17.0.17",
+    "@types/react": "17.0.39",
+    "chai": "^4.3.5",
+    "dotenv": "^16.0.0",
+    "eslint": "8.8.0",
+    "eslint-config-next": "12.0.10",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.5.3",
+    "hardhat": "^2.8.3",
+    "hardhat-dependency-compiler": "^1.1.2",
+    "ts-node": "^10.4.0",
+    "typescript": "4.5.5"
+  }
+}
