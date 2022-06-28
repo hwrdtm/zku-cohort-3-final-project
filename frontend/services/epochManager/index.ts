@@ -209,7 +209,7 @@ export async function updateTokenAllocations(
     console.log("tx submitted", { userCommitmentTxResponse });
 
     // wait until tx is confirmed
-    if (config.environment !== "local") {
+    if (config.browserEnvironment !== "local") {
       console.log("waiting until tx is confirmed");
       const userCommitmentTxReceipt = await userCommitmentTxResponse.wait(
         config.userCommitmentBlockConfirmations
