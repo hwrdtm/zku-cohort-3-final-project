@@ -2,8 +2,8 @@ import { ProofInput, SolidityProof, SolidityProofInput } from "../../models";
 
 const snarkjs = require("snarkjs");
 
-const wasmPath = "./public/CheckTokenAllocations_15.wasm";
-const zkeyPath = "./public/CheckTokenAllocations_15.final.zkey";
+const wasmPath = "./CheckTokenAllocations_15.wasm";
+const zkeyPath = "./CheckTokenAllocations_15.final.zkey";
 
 export async function generateProof(
   inputs: ProofInput
