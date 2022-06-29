@@ -58,7 +58,9 @@ async function setEpochOfAdminToStorage(
 async function getEpochOfAdminFromStorage(
   addressOfEpochAdmin: string
 ): Promise<SingleEpochPrivateTokenAllocations> {
-  const redis = createClient();
+  const redis = createClient({
+    url: config.browserRedisUrl,
+  });
   await redis.connect();
 
   try {
