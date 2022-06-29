@@ -1,3 +1,4 @@
+import config from "config";
 import { createClient } from "redis";
 import { SingleEpochPrivateTokenAllocations } from "../../models";
 
@@ -37,8 +38,9 @@ async function setEpochOfAdminToStorage(
   addressOfEpochAdmin: string,
   newEpochOfAdmin: SingleEpochPrivateTokenAllocations
 ): Promise<void> {
-  // TODO: pass redisURL
-  const redis = createClient();
+  const redis = createClient({
+    url: config.redisUrl,
+  });
   await redis.connect();
 
   try {

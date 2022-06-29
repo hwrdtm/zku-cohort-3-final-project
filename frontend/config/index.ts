@@ -13,7 +13,7 @@ const config = {
   ),
   environment: process.env.ENVIRONMENT || "local",
   browserEnvironment: process.env.NEXT_PUBLIC_ENVIRONMENT || "local",
-  redisUrl: "https://d336-64-46-0-32.ngrok.io", // TEMP
+  redisUrl: process.env.REDIS_URL || "http://localhost:6379",
 };
 
 export const getContractAddress = () => {

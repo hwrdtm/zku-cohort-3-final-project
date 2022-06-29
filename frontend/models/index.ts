@@ -21,6 +21,12 @@ export enum EpochState {
   Finalized = "Finalized",
 }
 
+export const getAllEpochState = () => {
+  return Object.keys(EpochState).filter((item) => {
+    return isNaN(Number(item));
+  });
+};
+
 export interface CollectRewardParams {
   addressOfEpochAdmin: string;
 }

@@ -7,6 +7,9 @@ import {
   isAddressMemberOfEpoch,
 } from "../../utils/epoch";
 import TokenAllocationInput from "../TokenAllocationInput";
+import EpochState from "../EpochState";
+import { utils } from "ethers";
+import { getBlockchainCurrency } from "../../constants";
 
 export default function EpochDetails({
   epoch,
@@ -36,8 +39,14 @@ export default function EpochDetails({
           Admin Address: {epoch.adminAddress}{" "}
           {!!connectedWalletAddress && isAddressAdmin ? "(you)" : ""}
         </h5>
-        <h5>Epoch State: {getEpochState(epoch)}</h5>
-        <h5>Reward Budget: {epoch.rewardBudget.toString()}</h5>
+        <h5>
+          Epoch State: <EpochState epochState={getEpochState(epoch)} />
+        </h5>
+        <h5>
+          Reward Budget:{" "}
+          {utils.formatUnits(epoch.rewardBudget.toString(), "ether")}{" "}
+          {getBlockchainCurrency()}
+        </h5>
         <h5>Members: {epoch.members.join(", ")}</h5>
         <h5>
           Token Allocation Commitments:{" "}
