@@ -45,11 +45,16 @@ export default async function handler(
 
   // Write private token allocations to (persistent / temporary) storage
   // to be used at later stage during reveal.
-  persistPrivateTokenAllocations(
-    addressOfEpochAdmin,
-    recoveredWalletAddress,
-    privTokenAllocations
-  );
+  try {
+    await persistPrivateTokenAllocations(
+      addressOfEpochAdmin,
+      recoveredWalletAddress,
+      privTokenAllocations
+    );
+  } catch (error: any) {
+    console.error("unable to persist token allocations", { error });
+    return res.status(500).send("Unable to store token allocations");
+  }
 
   // Hash private variables to get hash
   let tokenAllocationCommitmentHash: BigNumber;
@@ -60,7 +65,7 @@ export default async function handler(
     );
   } catch (error: any) {
     console.error("unable to generate commitment hash", { error });
-    return res.status(500).end();
+    return res.status(500).send("Unable to generate commitment hash");
   }
 
   // Generate proof
@@ -74,8 +79,8 @@ export default async function handler(
       salt: BigNumber.from(privSalt).toBigInt(),
     });
   } catch (error: any) {
-    console.error("unable to generate proof", { error });
-    return res.status(500).end();
+    console.error("Unable to generate proof", { error });
+    return res.status(500).send("Unable to generate proof.");
   }
 
   // Submit proof to contract
@@ -90,8 +95,8 @@ export default async function handler(
       solidityProofInput
     );
   } catch (error: any) {
-    console.error("unable to submit proof", { error });
-    return res.status(500).end();
+    console.error("Unable to submit proof", { error });
+    return res.status(500).send("Unable to submit proof");
   }
 
   return res.status(200).end();
