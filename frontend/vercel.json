@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/token-allocations.js": {
+    "api/**/*.js": {
       "includeFiles": "public/Check*"
     }
   }
