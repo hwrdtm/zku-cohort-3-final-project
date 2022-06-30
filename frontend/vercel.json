@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/token-allocations.js": {
+      "includeFiles": "public/Check*"
+    }
+  }
+}
