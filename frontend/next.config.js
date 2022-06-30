@@ -1,12 +1,29 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-  // StrictMode render twice... https://github.com/vercel/next.js/issues/35822
-  reactStrictMode: false,
-  webpack: function (config, options) {
-    if (!options.isServer) {
-      config.resolve.fallback.fs = false;
+  reactStrictMode: true,
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    if (!isServer) {
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          global: "global",
+        })
+      );
+
+      config.resolve.fallback = {
+        fs: false,
+        stream: false,
+        crypto: false,
+        os: false,
+        readline: false,
+        ejs: false,
+        assert: require.resolve("assert"),
+        path: false,
+      };
+
+      return config;
     }
+
     return config;
   },
   serverRuntimeConfig: {

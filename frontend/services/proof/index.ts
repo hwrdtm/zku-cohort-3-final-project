@@ -21,8 +21,8 @@ export async function generateProof(
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     inputs,
-    serverPath(`/public${wasmPath}`),
-    serverPath(`/public${zkeyPath}`)
+    serverPath(`/circuits${wasmPath}`),
+    serverPath(`/circuits${zkeyPath}`)
   );
 
   console.log("proof", proof, "publicSignals", publicSignals);
