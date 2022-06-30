@@ -29,6 +29,11 @@ const nextConfig = {
       return config;
     }
 
+    config.experiments = {
+      asyncWebAssembly: true,
+      syncWebAssembly: true,
+    };
+
     return config;
   },
   serverRuntimeConfig: {
