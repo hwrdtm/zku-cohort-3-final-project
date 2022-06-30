@@ -5,7 +5,7 @@
   "license": "GPLv3",
   "scripts": {
     "dev": "next dev",
-    "start": "next start",
+    "start": "next start -p $PORT",
     "build": "next build",
     "lint": "next lint"
   },
