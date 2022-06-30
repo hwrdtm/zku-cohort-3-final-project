@@ -6,7 +6,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const dirToCheck = process.cwd();
+  // const dirToCheck = process.cwd();
+  const dirToCheck = "/vercel/path0/frontend";
 
   const allFiles = getAllFiles(dirToCheck);
 
