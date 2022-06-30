@@ -1,18 +1,9 @@
-import path from "path";
-import getConfig from "next/config";
 import { ProofInput, SolidityProof, SolidityProofInput } from "../../models";
 
 const snarkjs = require("snarkjs");
 
 const wasmPath = "/CheckTokenAllocations_15.wasm";
 const zkeyPath = "/CheckTokenAllocations_15.final.zkey";
-
-const serverPath = (staticFilePath: string) => {
-  return path.join(
-    getConfig().serverRuntimeConfig.PROJECT_ROOT,
-    staticFilePath
-  );
-};
 
 export async function generateProof(
   inputs: ProofInput
