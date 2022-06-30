@@ -19,13 +19,20 @@ export async function generateProof(
 ): Promise<SolidityProofInput> {
   console.log("inputs", inputs);
 
-  await fetch(wasmPath);
-  await fetch(zkeyPath);
+  const wasmFileRef = serverPath(`/circuits${wasmPath}`);
+  const zkeyFileRef = serverPath(`/circuits${zkeyPath}`);
+
+  console.log(typeof window);
+  console.log(wasmFileRef);
+  console.log(zkeyFileRef);
+
+  await fetch(wasmFileRef);
+  await fetch(zkeyFileRef);
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     inputs,
-    serverPath(`/circuits${wasmPath}`),
-    serverPath(`/circuits${zkeyPath}`)
+    wasmFileRef,
+    zkeyFileRef
   );
 
   console.log("proof", proof, "publicSignals", publicSignals);
