@@ -1,8 +1,29 @@
 /** @type {import('next').NextConfig} */
 
+const CopyPlugin = require("copy-webpack-plugin");
+
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
 const nextConfig = {
   reactStrictMode: true,
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.plugins.push(
+      new CopyPlugin({
+        patterns: [
+          {
+            from: "./public/CheckTokenAllocations_15.wasm",
+            to: "./public/CheckTokenAllocations_15.wasm",
+          },
+          {
+            from: "./public/CheckTokenAllocations_15.final.zkey",
+            to: "./public/CheckTokenAllocations_15.final.zkey",
+          },
+        ],
+      })
+    );
+
     if (!isServer) {
       config.plugins.push(
         new webpack.ProvidePlugin({
@@ -21,18 +42,8 @@ const nextConfig = {
         path: false,
       };
 
-      config.experiments = {
-        asyncWebAssembly: true,
-        syncWebAssembly: true,
-      };
-
       return config;
     }
-
-    config.experiments = {
-      asyncWebAssembly: true,
-      syncWebAssembly: true,
-    };
 
     return config;
   },
@@ -41,4 +52,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

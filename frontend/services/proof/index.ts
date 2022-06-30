@@ -1,9 +1,6 @@
 import { ProofInput, SolidityProof, SolidityProofInput } from "../../models";
 import path from "path";
 import getConfig from "next/config";
-import "../../circuits/CheckTokenAllocations_15.wasm";
-import "../../circuits/CheckTokenAllocations_15.final.zkey";
-
 const snarkjs = require("snarkjs");
 
 const wasmPath = "/CheckTokenAllocations_15.wasm";
@@ -20,18 +17,15 @@ export async function generateProof(
   inputs: ProofInput
 ): Promise<SolidityProofInput> {
   console.log("inputs", inputs);
-
-  const wasmFileRef = serverPath(`/circuits${wasmPath}`);
-  const zkeyFileRef = serverPath(`/circuits${zkeyPath}`);
-
-  console.log(typeof window);
-  console.log(wasmFileRef);
-  console.log(zkeyFileRef);
+  console.log(
+    "serverPath",
+    serverPath(`/public/CheckTokenAllocations_15.wasm`)
+  );
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     inputs,
-    wasmFileRef,
-    zkeyFileRef
+    serverPath(`/public${wasmPath}`),
+    serverPath(`/public${zkeyPath}`)
   );
 
   console.log("proof", proof, "publicSignals", publicSignals);
