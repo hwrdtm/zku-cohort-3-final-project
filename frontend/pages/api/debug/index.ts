@@ -15,7 +15,7 @@ export default async function handler(
     console.log("detected file", { dirToCheck, file });
   });
 
-  return res.status(200).end();
+  return res.status(200).json(allFiles);
 }
 
 const getAllFiles = function (dirPath: string, arrayOfFilesInput?: string[]) {
