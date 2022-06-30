@@ -9,16 +9,26 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const nextConfig = {
   reactStrictMode: true,
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    const vercelTargetWasmDest = `/var/task/frontend/public/CheckTokenAllocations_15.wasm`;
+    const vercelTargetZkeyDest = `/var/task/frontend/public/CheckTokenAllocations_15.final.zkey`;
+
+    console.log("copying to", {
+      __dirname,
+      isServer,
+      vercelTargetWasmDest,
+      vercelTargetZkeyDest,
+    });
+
     config.plugins.push(
       new CopyPlugin({
         patterns: [
           {
             from: "./public/CheckTokenAllocations_15.wasm",
-            to: `${__dirname}/public/CheckTokenAllocations_15.wasm`,
+            to: vercelTargetWasmDest,
           },
           {
             from: "./public/CheckTokenAllocations_15.final.zkey",
-            to: `${__dirname}/public/CheckTokenAllocations_15.final.zkey`,
+            to: vercelTargetZkeyDest,
           },
         ],
       })

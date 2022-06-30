@@ -8,7 +8,6 @@ export default async function handler(
 ) {
   const dirToCheck = process.cwd();
 
-  console.log("checking dir", { dirToCheck });
   const allFiles = getAllFiles(dirToCheck);
 
   allFiles.forEach((file) => {
@@ -23,8 +22,6 @@ const getAllFiles = function (dirPath: string, arrayOfFilesInput?: string[]) {
 
   let arrayOfFiles = arrayOfFilesInput || [];
 
-  // console.log("files", files);
-
   files.forEach(function (file) {
     if (file === "node_modules") {
       return;
@@ -33,10 +30,6 @@ const getAllFiles = function (dirPath: string, arrayOfFilesInput?: string[]) {
     if (fs.statSync(dirPath + "/" + file).isDirectory()) {
       arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles);
     } else {
-      console.log("__dirname", __dirname);
-      console.log("dirPath", dirPath);
-      console.log("file", file);
-
       arrayOfFiles.push(path.join(__dirname, dirPath, "/", file));
     }
   });
