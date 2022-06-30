@@ -14,11 +14,11 @@ const nextConfig = {
         patterns: [
           {
             from: "./public/CheckTokenAllocations_15.wasm",
-            to: "./public/CheckTokenAllocations_15.wasm",
+            to: `${__dirname}/public/CheckTokenAllocations_15.wasm`,
           },
           {
             from: "./public/CheckTokenAllocations_15.final.zkey",
-            to: "./public/CheckTokenAllocations_15.final.zkey",
+            to: `${__dirname}/public/CheckTokenAllocations_15.final.zkey`,
           },
         ],
       })
