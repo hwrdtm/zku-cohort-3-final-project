@@ -19,8 +19,3 @@ snarkjs zkey export verificationkey ./zkeys/${CIRCUIT_NAME}_test.final.zkey ./zk
 
 # generate solidity contract
 snarkjs zkey export solidityverifier ./zkeys/${CIRCUIT_NAME}_test.final.zkey ../contracts/CheckTokenAllocationsVerifier.sol
-
-# copy wasm and zkey
-cp ./zkeys/${CIRCUIT_NAME}_test_js/${CIRCUIT_NAME}_test.wasm ../frontend/public/${CIRCUIT_NAME}.wasm
-
-cp ./zkeys/${CIRCUIT_NAME}_test.final.zkey ../frontend/public/${CIRCUIT_NAME}.final.zkey

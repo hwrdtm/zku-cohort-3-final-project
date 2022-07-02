@@ -584,6 +584,76 @@ describe("EpochManager.sol", function () {
           ethers.BigNumber.from("0")
         );
       });
+
+      it("Epoch members can update token allocation commitment AGAIN after previous one has been verified", async function () {
+        const [deployer, address1, address2, coordinator] =
+          await ethers.getSigners();
+
+        // deployer creates new epoch
+        const blockTimestamp = await getCurrentBlockTimestamp();
+        const msUntilEpochStarts = 1 * 1000;
+        const startsAt = blockTimestamp + msUntilEpochStarts;
+        const scheduleTx = await epochManager
+          .connect(deployer)
+          .scheduleNewEpoch(
+            [address1.address, address2.address],
+            startsAt,
+            10000,
+            coordinator.address,
+            {
+              value: ethers.utils.parseEther("10"),
+            }
+          );
+        await scheduleTx.wait();
+
+        // timetravel to when epoch is active
+        await ethers.provider.send("evm_increaseTime", [msUntilEpochStarts]);
+        await ethers.provider.send("evm_mine");
+
+        // address1 updates commitment and coordinator submits proof
+        const tokenAllocations = generateArrayWithValues(15, (_) => 0);
+        tokenAllocations[1] = 10000;
+        await signerUpdatesCommitmentAndCoordinatorSubmitsProof(
+          epochManager,
+          address1,
+          coordinator,
+          {
+            tokenAllocations,
+            salt: "1",
+            addressOfEpochAdmin: deployer.address,
+            allocatingMemberIdx: 0,
+            numMembers: 2,
+          }
+        );
+
+        // fetch details of epoch
+        const epochTokenAllocationCommitmentsVerified =
+          await epochManager.getEpochTokenAllocationCommitmentsVerified(
+            deployer.address
+          );
+        expect(epochTokenAllocationCommitmentsVerified[0]).to.eq(true);
+        expect(epochTokenAllocationCommitmentsVerified[1]).to.eq(false);
+
+        // address1 updates token allocation commitment AGAIN
+        const pubTokenAllocationHash = ethers.BigNumber.from(
+          poseidonJs.F.toObject(poseidonJs(["1"]))
+        );
+        const updateCommitmentTx = await epochManager
+          .connect(address1)
+          .updateTokenAllocationCommitment(
+            deployer.address,
+            pubTokenAllocationHash
+          );
+        await updateCommitmentTx.wait();
+
+        // fetch details of epoch AGAIN
+        const epochTokenAllocationCommitmentsVerified2 =
+          await epochManager.getEpochTokenAllocationCommitmentsVerified(
+            deployer.address
+          );
+        expect(epochTokenAllocationCommitmentsVerified2[0]).to.eq(false);
+        expect(epochTokenAllocationCommitmentsVerified2[1]).to.eq(false);
+      });
     });
 
     describe("fail", function () {
@@ -1881,8 +1951,8 @@ function unstringifyBigInts(o) {
 async function generateProof(input) {
   const { proof, publicSignals } = await groth16.fullProve(
     input,
-    "frontend/public/CheckTokenAllocations_15.wasm",
-    "frontend/public/CheckTokenAllocations_15.final.zkey"
+    "circuits/zkeys/CheckTokenAllocations_15_test_js/CheckTokenAllocations_15_test.wasm",
+    "circuits/zkeys/CheckTokenAllocations_15_test.final.zkey"
   );
 
   const editedPublicSignals = unstringifyBigInts(publicSignals);

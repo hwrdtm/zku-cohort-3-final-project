@@ -2,6 +2,12 @@
 
 ## Testing
 
+First, setup circuits:
+
+```
+sh setup_circuits.sh
+```
+
 Run tests against circuit and smart contracts:
 
 ```

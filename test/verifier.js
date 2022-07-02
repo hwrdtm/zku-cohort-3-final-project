@@ -33,8 +33,8 @@ describe("CheckTokenAllocationsVerifier.sol", function () {
         tokenAllocations: tokenAllocations,
         salt,
       },
-      "frontend/public/CheckTokenAllocations_15.wasm",
-      "frontend/public/CheckTokenAllocations_15.final.zkey"
+      "circuits/zkeys/CheckTokenAllocations_15_test_js/CheckTokenAllocations_15_test.wasm",
+      "circuits/zkeys/CheckTokenAllocations_15_test.final.zkey"
     );
 
     const editedPublicSignals = unstringifyBigInts(publicSignals);

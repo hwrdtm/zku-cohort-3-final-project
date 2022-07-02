@@ -48,31 +48,14 @@ contract EpochManager is CheckTokenAllocationsVerifier {
         // Update storage.
         Epoch storage newEpochToSchedule = adminEpochs[msg.sender];
         newEpochToSchedule.rewardBudget = msg.value;
-        newEpochToSchedule.members = members;
-        newEpochToSchedule.tokenAllocationCommitments = new bytes32[](
-            members.length
-        );
-        newEpochToSchedule.tokenAllocationCommitmentsVerified = new bool[](
-            members.length
-        );
-        newEpochToSchedule.revealedTokenAllocations = new uint256[](
-            members.length
-        );
-        newEpochToSchedule.rewardWithdrawals = new bool[](members.length);
-
-        // Calculate how much of rewardBudget would be sent to each epoch
-        // member.
-        // TODO: handle super small rewardBudget amounts (eg. in wei, less
-        // than totalEpochTokens, causing 0 reward to send to each epoch
-        // member due to floored division).
-        uint256 totalEpochTokens = newEpochToSchedule.members.length * 10000;
-        newEpochToSchedule.rewardBudgetPerToken =
-            newEpochToSchedule.rewardBudget /
-            totalEpochTokens;
 
         newEpochToSchedule.startsAt = startsAt;
         newEpochToSchedule.epochDuration = epochDuration;
         newEpochToSchedule.dedicatedCoordinator = dedicatedCoordinator;
+
+        _updateEpochMembers(members);
+
+        // Emit event.
         emit EpochScheduled(msg.sender);
     }
 
@@ -80,6 +63,18 @@ contract EpochManager is CheckTokenAllocationsVerifier {
         external
         onlyBeforeActiveEpoch(msg.sender)
     {
+        require(
+            members.length >= 2 && members.length <= 15,
+            "Cannot create Epoch involving less than 2 members or more than 15 members"
+        );
+
+        _updateEpochMembers(members);
+
+        // Emit event.
+        emit EpochUpdated(msg.sender);
+    }
+
+    function _updateEpochMembers(address[] memory members) private {
         // Update Epoch.
         Epoch storage epochToUpdate = adminEpochs[msg.sender];
         epochToUpdate.members = members;
@@ -94,13 +89,13 @@ contract EpochManager is CheckTokenAllocationsVerifier {
 
         // Calculate how much of rewardBudget would be sent to each epoch
         // member.
+        // TODO: handle super small rewardBudget amounts (eg. in wei, less
+        // than totalEpochTokens, causing 0 reward to send to each epoch
+        // member due to floored division).
         uint256 totalEpochTokens = epochToUpdate.members.length * 10000;
         epochToUpdate.rewardBudgetPerToken =
             epochToUpdate.rewardBudget /
             totalEpochTokens;
-
-        // Emit event.
-        emit EpochUpdated(msg.sender);
     }
 
     /// Functions for active Epochs.
@@ -120,6 +115,11 @@ contract EpochManager is CheckTokenAllocationsVerifier {
         epochToUpdate.tokenAllocationCommitments[
             uint256(epochMemberIdx)
         ] = commitment;
+
+        // Mark commitment as unverified.
+        epochToUpdate.tokenAllocationCommitmentsVerified[
+            uint256(epochMemberIdx)
+        ] = false;
 
         // Emit event.
         emit EpochUpdated(addressOfEpochAdmin);

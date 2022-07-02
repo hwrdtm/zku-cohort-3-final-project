@@ -25,13 +25,13 @@ async function main() {
   await epochManager.deployed();
   console.log("EpochManager address:", epochManager.address);
 
-  // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(epochManager, network.name);
+  // We save the contract's deployment artifacts.
+  saveDeploymentArtifacts(epochManager, network.name);
 }
 
-function saveFrontendFiles(epochManager, network) {
+function saveDeploymentArtifacts(epochManager, network) {
   const fs = require("fs");
-  const contractsDir = __dirname + "/../frontend/contracts";
+  const contractsDir = __dirname + "/../contracts/deployment";
 
   if (!fs.existsSync(contractsDir)) {
     fs.mkdirSync(contractsDir);
