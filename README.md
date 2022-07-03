@@ -1,5 +1,7 @@
 # Final Project: **Anonymous Coordinape**
 
+Frontend Repo: https://github.com/hwrdtm/zku-cohort-3-final-project-frontend
+
 Coordinape is a peer-based payroll management tool for DAOs. It features a Map functionality which allows anyone to visualize each contributor's public allocations of GIVE tokens towards the other contributors. This is rather sensitive information to many, and it would be nice if this can be kept private. Organizational peer-reviews make sense to be kept private - now, why aren't peer-based payroll allocations too?
 
 With **Anonymous Coordinape**, Epoch members submit their GIVE token allocations to the rest of the team **privately**. The only time when the GIVE tokens are made public is **after** each of the Epoch members' private token allocations are aggregated.
