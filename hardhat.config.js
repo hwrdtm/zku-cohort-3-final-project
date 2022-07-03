@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 
 const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
+const MAINNET_PRIVATE_KEY = process.env.MAINNET_PRIVATE_KEY;
 const HARMONY_DEVNET_PRIVATE_KEY = process.env.HARMONY_DEVNET_PRIVATE_KEY;
 const HARMONY_MAINNET_PRIVATE_KEY = process.env.HARMONY_MAINNET_PRIVATE_KEY;
 
@@ -43,6 +44,10 @@ module.exports = {
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/41e5bf69dc524d1c9d3b009c41675169",
       accounts: [`0x${RINKEBY_PRIVATE_KEY}`],
+    },
+    mainnet: {
+      url: "https://mainnet.infura.io/v3/41e5bf69dc524d1c9d3b009c41675169",
+      accounts: [`0x${MAINNET_PRIVATE_KEY}`],
     },
     hardhat: {
       chainId: 1337,

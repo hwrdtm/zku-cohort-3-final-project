@@ -89,6 +89,13 @@ Before going through what needs to be built, we begin with the list of design de
 
 - Without this two-step verification process, Epoch members can submit a commitment on-chain but send completely different private token allocations to the centralized backend. Therefore, by having the member send all relevant commitment parameters to the backend and then the backend generates and submits a proof, we can guarantee that the backend at least has knowledge of the private parameters for that Epoch member. The final trust assumption is that the backend does not tamper with the private token allocations during aggregation when revealing.
 
+- All Epochs go through the same 4-stage lifecycle.
+  - An Epoch can be overwritten at any point, which returns it to the Scheduled state.
+  - Otherwise, the state machine takes the Epoch strictly from Scheduled to Active, to Finished, and to Finalized lifecycle states.
+  - These lifecycle states are not explicitly programmed into the smart contract, they are entirely semantically and time driven.
+
+![image](Epoch%20Lifecycle.png)
+
 ## Overall Components
 
 With that, here is an overview of the components that are needed to build this product:
