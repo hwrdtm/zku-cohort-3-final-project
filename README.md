@@ -2,43 +2,61 @@
 
 Coordinape is a peer-based payroll management tool for DAOs. It features a Map functionality which allows anyone to visualize each contributor's public allocations of GIVE tokens towards the other contributors. This is rather sensitive information to many, and it would be nice if this can be kept private. Organizational peer-reviews make sense to be kept private - now, why aren't peer-based payroll allocations too?
 
-With **Anonymous Coordinape**, Circle members submit their GIVE token allocations to the rest of the team **privately**. The only time when the GIVE tokens are made public is **after** each of the Circle members' private token allocations are aggregated.
+With **Anonymous Coordinape**, Epoch members submit their GIVE token allocations to the rest of the team **privately**. The only time when the GIVE tokens are made public is **after** each of the Epoch members' private token allocations are aggregated.
 
 Here is an example:
 
-1. There exists a Circle with Alice, Bob and Charlie. Total GIVE tokens possible within Circle is 300 (100 GIVE tokens allocated to each member initially.)
-2. Once an Epoch begins, Circle members submit their distributions privately:
+1. There exists a Epoch with Alice, Bob and Charlie. Total GIVE tokens possible within Epoch is 30000 (10000 GIVE tokens allocated to each member initially.)
+2. Once an Epoch begins, Epoch members submit their distributions privately:
 
-   - Alice -> Bob: 30 GIVE
-   - Alice -> Charlie: 70 GIVE
-   - Bob -> Alice: 40 GIVE
-   - Bob -> Charlie: 60 GIVE
-   - Charlie -> Alice: 10 GIVE
-   - Charlie -> Bob: 10 GIVE
+   - Alice -> Bob: 3000 GIVE
+   - Alice -> Charlie: 7000 GIVE
+   - Bob -> Alice: 4000 GIVE
+   - Bob -> Charlie: 6000 GIVE
+   - Charlie -> Alice: 1000 GIVE
+   - Charlie -> Bob: 1000 GIVE
 
 3. Once the Epoch ends, the token distributions are aggregated, summed, and the following is made public:
 
-   - Alice receives: 50 GIVE
-   - Bob receives: 40 GIVE
-   - Charlie receives: 130 GIVE
+   - Alice receives: 5000 GIVE
+   - Bob receives: 4000 GIVE
+   - Charlie receives: 13000 GIVE
 
-4. The GIVE tokens are automatically converted into GET tokens.
-5. Each Circle member then proceeds to redeem USDC from GET tokens **within a claim window**.
+4. Each Epoch member then proceeds to redeem the reward with their GIVE token allocations **within a claim window**.
 
-Read the Competitive Landscape section below for more details on the Coordinape product.
+Read the Competitive Landscape section below for more details on the original Coordinape product.
+
+# Why Are Zero-Knowledge Proofs Necessary?
+
+Zero-Knowledge Proofs enable provers to prove the validity of their private commitments without revealing in plaintext any details about the private commitment pre-image. This is exactly the kind of technology that can enable Anonymous Coordinape to function as intended.
+
+# Glossary
+
+Admin
+
+- The creator of an Epoch.
+
+Member
+
+- A participant of an Epoch.
+
+Finished Epoch
+
+- An Epoch that is no longer accepting commitment or commitment proof submissions, and can only be overwritten by a newly scheduled Epoch, or have token allocations be revealed to reach Finalized state.
+
+Finalized Epoch
+
+- An Epoch that has revealed the tokens allocated to each member and can only be overwritten by a newly scheduled Epoch.
 
 # Functional Requirements
 
-Here is the basic functionality for the MVP:
+The objective of the MVP is to demonstrate the usage of zero-knowledge proofs towards an application use-case similar to Coordinape's. Therefore, here is the minimal viable feature set for the MVP:
 
-1. As an admin, I can create a Coordinape Circle.
-2. As an admin of my Circle, I can add members to my Circle.
-3. As an admin of my Circle, I can set the time window for a new Epoch.
-4. As an admin of my Circle, all my Circle's members are automatically part of the new Epoch. (this is for simplicity - in the future we can add members to each Epoch)
-5. As a member of a live Epoch, I am automatically given 100 GIVE tokens.
-6. As a member of a live Epoch, I can submit my private distribution commitment along with a ZK proof.
-7. As a member of an expired Epoch, I can publicly see the amount of GIVE / GET tokens I have been allocated by team members.
-8. As a member of an expired Epoch, any of my GIVE tokens that are unallocated are burned.
+1. As an admin, I can schedule an Epoch which begins in the future.
+2. As a member of an active Epoch, I can submit my private token allocation commitment, which is then proved by the dedicated coordinator.
+3. As a coordinator of an active Epoch, I can submit a proof of a member's token allocation commitment in order to mark it as verified.
+4. As a coordinator of a finished Epoch, I can submit the revealed token allocations per each member.
+5. As a member of a Finalized Epoch, I can collect the rewards for that Epoch which is proportional to the number of tokens that have been allocated to myself.
 
 # Out of Scope
 
@@ -50,22 +68,42 @@ We do not explore how ZK technology can be used to preserve the privacy of walle
 
 # Proposal Overview
 
-Here is an overview of the components that are needed to build this product:
+## Design Decisions
 
-1. ERC20 Smart Contract for GIVE
-2. Web frontend
+Before going through what needs to be built, we begin with the list of design decisions that are made, some for simplicity, some for working with technical constraints, some for avoiding members "cheating" the system:
+
+- For simplicity, users interact directly with Epochs, instead of having to create Circles as an additional grouping mechanism on top.
+- For simplicity, any wallet address can only maintain the state of 1 Epoch. This means that the state of old Epochs that get overwritten is not maintained.
+- For simplicity, all Epochs must use the API's dedicated coordinator.
+- All Epochs must have between 2 and 15 members.
+
+  - The upper limit is a technical constraint. While less than 2 members is meaningless, more than 15 members means cannot use Poseidon hashing function in the arithmetic circuit to generate a proof. Besides, the larger the Epoch group the poorer your understanding of your teammates' output during that Epoch, and it becomes harder to decide on the number of tokens to allocate to the other Epoch members.
+
+- Any member must not be able to allocate any tokens privately to themselves at all.
+
+  - Private token allocations encourage members to allocate tokens to themselves. In an effort to avoid this form of "cheating", we make it impossible for members to allocate any tokens to themselves. This means that, a special case is when there are only 2 members in an Epoch and they can only allocate all 10000 tokens to each other - the reward budgeted for this Epoch is split in half between members. For this reason, Epoch groups are encouraged to be a little larger than 2 members - indeed, at a size of 3 there can already be token allocations that are more interesting and meaningful.
+
+- For integrity & security, all commitments submitted by Epoch members must be verified by the coordinator by submitting a proof corresponding to their commitment. Unverified member commitments will prevent the Epoch from being finalized.
+
+- Without this two-step verification process, Epoch members can submit a commitment on-chain but send completely different private token allocations to the centralized backend. Therefore, by having the member send all relevant commitment parameters to the backend and then the backend generates and submits a proof, we can guarantee that the backend at least has knowledge of the private parameters for that Epoch member. The final trust assumption is that the backend does not tamper with the private token allocations during aggregation when revealing.
+
+## Overall Components
+
+With that, here is an overview of the components that are needed to build this product:
+
+1. Web frontend
+2. Backend ("process")
 3. Circom circuit
-4. Smart Contract for Contributor, Circle, GIVE token management.
+4. Smart Contract for managing Epochs.
 5. Smart Contract for verifying ZK proofs.
-6. Backend process(es)
 
 In detail, this is how the system would work:
 
-2. A web frontend would manage user interactions with the dApp as well as generating a zk-SNARK based proof that the user did submit a valid distribution of their GIVE tokens. At the same time, their private token distributions are sent over the network to a long-running process managed by the developers (ie. myself, hosted in some cloud provider).
-3. An arithmetic circuit will need to be constructed to prove that users' private token allocation to the rest of the contributing team is valid without revealing it.
-4. A smart contract is needed to manage the state of contributors, Circles, and trigger GIVE / GET token transfers and USDC redemption.
-5. A smart contract is needed to verify ZK proofs.
-6. A backend process is needed to calculate the final GIVE token distributions that will be revealed at the end of each Epoch, then committed on-chain for users to then convert into GET before redeeming into USDC.
+1. A web frontend would manage user interactions with the dApp as well as generating a zk-SNARK based proof that the user did submit a valid distribution of their tokens. At the same time, their private token distributions are sent to a centralized backend (managed by the developers).
+2. An arithmetic circuit will need to be constructed to prove that users' private token allocation to the rest of the contributing team is valid without revealing it.
+3. A smart contract is needed to manage the state of contributors, Epoch, and trigger GIVE / GET token transfers and USDC redemption.
+4. A smart contract is needed to verify ZK proofs.
+5. A backend process is needed to calculate the final token allocations that will be revealed at the end of each Epoch, then committed on-chain for users to then collect their rewards.
 
 Flow + Architecture diagram can be found in `diagrams` folder.
 
@@ -73,18 +111,30 @@ Flow + Architecture diagram can be found in `diagrams` folder.
 
 Here is the specification for the arithmetic circuit:
 
+- **Public** inputs:
+  - The commitment made on-chain by an Epoch member.
+  - The index of the Epoch member that is attempting to generate a proof for their private token allocation.
+  - The number of members in the Epoch.
 - **Private** inputs:
-  - An array of integers representing the list of **all** Circle members, ordered lexicographically. The 0-th index will represent the number of tokens that are **not** allocated to any contributor.
+  - An array of integers representing the list of **all** Epoch members, ordered lexicographically. The 0-th index will represent the number of tokens that are **not** allocated to any contributor.
   - Salt
 - Checks / Constraints:
-  - Each integer in the array is greater than 0.
-  - Sum of integer array is equal to the total GIVE tokens to allocate, which is 10000 (to work nicely with basis points, or hundredths of a percentage)
+  - Token allocation only contains positive integers.
+  - Number of members is between 0 and 15.
+  - Index of the allocating Epoch member must be between 0 and the number of members - 1.
+  - Token allocation does not contain non-zero integer at the index of the allocating Epoch member.
+  - Token allocation does not contain non-zero integer at any index greater than the number of members.
+  - Token allocation contains integers whose sum is equal to 10000 (to work nicely with basis points, or hundredths of a percentage)
 - **Public** outputs:
   - Hash of the integer array along with a salt.
 
-A salt is needed to prevent brute-force attacks. In most cases, Coordinape Circles will be small (as they should be) which reduces the search space for an attacker to find out a pre-image corresponding to the hash that is committed onto the public smart contract. A privately generated salt will drastically increase the search space to make it programmatically and statistically impossible for an attacker to find a collision.
+A salt is needed to prevent brute-force attacks. In most cases, Coordinape Epochs will be small (as they should be) which reduces the search space for an attacker to find out a pre-image corresponding to the hash that is committed onto the public smart contract. A privately generated salt will drastically increase the search space to make it programmatically and statistically impossible for an attacker to find a collision.
 
-Please check `poc_circuit.circom` in this directory for a POC for what the arithmetic circuit might look like. (incomplete due to lack of time)
+### One Circuit, Multiple Membership Sizes
+
+Given that the private integer array input for token allocations needs to be a fixed size array at compile-time, one approach to accommodate for various Epoch membership sizes is to compile the `CheckTokenAllocations.circom` circuit for each of the membership size from 2 through to 15. Not only would this add a great deal of complexity, it would also drastically increase the storage and download requirements every time users browsed our application (due to the `.zkey` proof generation files). This is suboptimal.
+
+Instead, we can compile the circuit once with `n = 15`, and use public inputs in a way to accommodate for various Epoch membership sizes while providing guarantees that tokens aren't allocated to non-existent members etc. Extra verification is made at the contract level to ensure the correct public inputs are used.
 
 # Use Cases
 
@@ -166,15 +216,24 @@ Aim for code complete by June 23. QA from June 23-27.
 # FAQ
 
 - Why are we not building this on top of Semaphore?
-  - The aspect of Coordinape that we're improving with Anonymous Coordinape can be seen as a form of ZK voting, and Semaphore has been used for several voting applications previously. To recap, Semaphore is great for 1) basic membership validity checks and 2) enforcing one-time signals per each external nullifier. In our case, it wouldn't make sense to hide the public keys that are associated with a Circle (as it is trivial to trace who redeemed USDC with GET tokens anyways), and we should allow users to send as many updates to their token allocation commitments as they wish while the Epoch is still live.
+  - The aspect of Coordinape that we're improving with Anonymous Coordinape can be seen as a form of ZK voting, and Semaphore has been used for several voting applications previously. To recap, Semaphore is great for 1) basic membership validity checks and 2) enforcing one-time signals per each external nullifier. In our case, it wouldn't make sense to hide the public keys that are associated with a Epoch (as it is trivial to trace who redeemed USDC with GET tokens anyways), and we should allow users to send as many updates to their token allocation commitments as they wish while the Epoch is still live.
+- Why are we not building this on top of MACI?
+
+  - Though the needs of Anonymous Coordinape are quite similar to that of MACI's, MACI is built for the quadratic voting use case, and Anonymous Coordinape isn't quite "voting" related but more simply about distributing tokens. MACI does not contain a trivial amount of code and changing MACI components to fit the needs of Anonymous Coordinape required too much work, hence it was decided to write from scratch as a faster path to finishing the MVP. For example, MACI's circuits would need to be changed to fit the use case of token allocations instead of quadratic voting. Then, the signup function would have to be changed to be admin-based, which also manages Epochs.
+  - That said, MACI provides a number of relevant guarantees that Anonymous Coordinape can certainly benefit from. The first is anti-collusion - it would be helpful for Epoch members to perform bribe-resitant actions. Then, MACI allows reducing trust assumptions on centralized processes, by preventing the centralized coordinator from tampering with the Epoch. For these reason, the next version of Anonymous Coordinape can look to incorporate more elements of MACI. For those who are interested, here are the next steps for making Anonymous Coordinape tamper-proof:
+    - Similar to MACI, use (Incremental) Merkle Trees with leaves being the hashes of each Epoch Member's token allocation commitment.
+    - Introduce another circuit to have backend process enter the private token allocations + salts, check that the merkle tree root hash is maintained the same as the one on-chain (which is updated each time Epoch Member submits commitment), and then output an array corresponding to the final, revealed token allocations per each Epoch Member.
+
 - Why does this need to be on the blockchain / use smart contract anyways if centralized actors have full knowledge of everyone's token distributions anyway?
   - The implementation behind this MVP can be seen as a first step before we adopt homomorphic encryption techniques to **remove dependence on centralized actors (and anyone else ever seeing the private token allocations)** down the line. This is a known **next step**.
+- Why are getter functions like `getEpochMembers` written when the `adminEpochs` mapping is `public`?
+
+  - See [related thread](https://github.com/ethereum/solidity/issues/12792). Even though the `Epoch` struct can be retrieved publicly by default, its inner array fields are not returned. Hence, it is necessary to implement getter functions for those fields manually.
 
 # Open Questions
 
 The following questions will be answered in the future:
 
-- How can we strip more scope off of this MVP?
 - Can any component be designed to be re-usable?
 - Can we consider making the admin's budget per Epoch private too? That way, contributors detach from the actual monetary amount when giving out GIVE tokens.
 - This current proposal faces the same problem of relying on centralized actors for processing blind auctions and sending funds to the actual winner in [ZK Blind Auction](https://github.com/heivenn/zk-blind-auction). Would it be possible to adopt Homomorphic Encryption techniques to avoid the need for centralized actors altogether?
